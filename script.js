@@ -8,16 +8,28 @@ const logTaskCount = function () {
 
 
 function displayTask(taskText) {
-    const li = document.createElement('li');
 
+    const li = document.createElement('li');
     const textNode = document.createTextNode(taskText + " ");
     li.appendChild(textNode);
 
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = 'Supprimer';
+
     deleteBtn.addEventListener('click', () => {
-        taskList.removeChild(li);
-        logTaskCount();
+        const index = Array.from(taskList.children).indexOf(li);
+
+        fetch(`http://127.0.0.1:5000/tasks/${index}`, {
+            method: 'DELETE'
+        })
+
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                taskList.removeChild(li);
+                logTaskCount();
+            }
+        });
     });
 
     li.appendChild(deleteBtn);
@@ -39,6 +51,7 @@ function addTask() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+
             displayTask(data.task);
             logTaskCount();
             taskInput.value = '';
@@ -48,9 +61,12 @@ function addTask() {
 
 
 window.addEventListener('DOMContentLoaded', () => {
+
     fetch('http://127.0.0.1:5000/tasks')
+
         .then(response => response.json())
         .then(data => {
+
             data.forEach(task => displayTask(task));
             logTaskCount();
         });
@@ -60,12 +76,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 addTaskBtn.addEventListener('click',addTask)
 taskInput.addEventListener('keydown', function (event) {
+
     if (event.key === 'Enter') {
         addTask()
     }
 })
-
-
-
-
 
