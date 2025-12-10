@@ -6,37 +6,65 @@ const logTaskCount = function () {
     console.log("Nombre de tâches :", taskList.children.length);
 }
 
+
+function displayTask(taskText) {
+    const li = document.createElement('li');
+
+    const textNode = document.createTextNode(taskText + " ");
+    li.appendChild(textNode);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Supprimer';
+    deleteBtn.addEventListener('click', () => {
+        taskList.removeChild(li);
+        logTaskCount();
+    });
+
+    li.appendChild(deleteBtn);
+    taskList.appendChild(li);
+}
+
+
 function addTask() {
 
     const taskText = taskInput.value.trim();
     if (taskText === '') return;
 
-    const li = document.createElement('li');
-    li.textContent = taskText;
+    fetch('http://127.0.0.1:5000/tasks', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: taskText})
+    })
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Suppprimer';
-    deleteBtn.addEventListener('click', () => {
-        taskList.removeChild(li);
-        logTaskCount()
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayTask(data.task);
+            logTaskCount();
+            taskInput.value = '';
+        }
     });
-
-    li.appendChild(deleteBtn);
-    taskList.appendChild(li);
-
-    taskInput.value = '';
-    logTaskCount()
 }
 
 
+window.addEventListener('DOMContentLoaded', () => {
+    fetch('http://127.0.0.1:5000/tasks')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(task => displayTask(task));
+            logTaskCount();
+        });
+});
+
+
+
 addTaskBtn.addEventListener('click',addTask)
-
-
 taskInput.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
         addTask()
     }
-});
+})
+
 
 
 
