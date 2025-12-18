@@ -17,15 +17,23 @@ function displayTask(taskText) {
     deleteBtn.textContent = 'Supprimer';
 
     deleteBtn.addEventListener('click', () => {
+
         const index = Array.from(taskList.children).indexOf(li);
 
         fetch(`http://127.0.0.1:5000/tasks/${index}`, {
+
             method: 'DELETE'
         })
 
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) {
+
+            return response.json();
+        })
+
+        .then(function(data) {
+
             if (data.success) {
+
                 taskList.removeChild(li);
                 logTaskCount();
             }
@@ -38,11 +46,13 @@ function displayTask(taskText) {
 
 
 function addTask() {
-
     const taskText = taskInput.value.trim();
     if (taskText === '') return;
 
+    console.log("Avant l'envoi de la tâche au serveur :", taskText);
+
     fetch('http://127.0.0.1:5000/tasks', {
+
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({text: taskText})
@@ -50,13 +60,17 @@ function addTask() {
 
     .then(response => response.json())
     .then(data => {
+
         if (data.success) {
 
+            console.log("Réponse du serveur reçue :", data.task);
             displayTask(data.task);
             logTaskCount();
             taskInput.value = '';
         }
     });
+
+    console.log("Après l'envoi de la tâche (avant la réponse du serveur)");
 }
 
 
@@ -64,14 +78,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
     fetch('http://127.0.0.1:5000/tasks')
 
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) {
 
-            data.forEach(task => displayTask(task));
+            return response.json();
+        })
+
+        .then(function(data) {
+
+            data.forEach(function(task) {
+
+                displayTask(task);
+            });
+
             logTaskCount();
+
         });
 });
-
 
 
 addTaskBtn.addEventListener('click',addTask)
